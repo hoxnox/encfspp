@@ -1,10 +1,11 @@
-/**@author $username$ <$usermail$>
- * @date $date$
+/**@author hoxnox <hoxnox@gmail.com>
+ * @date 20160810 15:03:46
  *
  * @brief libencfs test launcher.*/
 
 // Google Testing Framework
 #include <gtest/gtest.h>
+#include "tEncfsMounter.hpp"
 
 // test cases
 

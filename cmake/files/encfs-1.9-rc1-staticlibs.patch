@@ -1,0 +1,49 @@
+diff --git a/cmake/FindFUSE.cmake b/cmake/FindFUSE.cmake
+index b1e8861..80276f6 100644
+--- a/cmake/FindFUSE.cmake
++++ b/cmake/FindFUSE.cmake
+@@ -1,5 +1,9 @@
+ # Find the FUSE includes and library
+ #
++#  input:
++#  FUSE_USE_STATIC_LIBS
++#  Use CMAKE_FIND_ROOT_PATH for ROOT specification
++#
+ #  FUSE_INCLUDE_DIR - where to find fuse.h, etc.
+ #  FUSE_LIBRARIES   - List of libraries when using FUSE.
+ #  FUSE_FOUND       - True if FUSE lib is found.
+@@ -9,21 +13,22 @@ if (FUSE_INCLUDE_DIR)
+         SET (FUSE_FIND_QUIETLY TRUE)
+ endif (FUSE_INCLUDE_DIR)
+ 
+-if (APPLE)
+-    set (FUSE_NAMES libosxfuse.dylib fuse)
+-    set (FUSE_SUFFIXES osxfuse fuse)
+-else (APPLE)
+-    set (FUSE_NAMES fuse)
+-    set (FUSE_SUFFIXES fuse)
+-endif (APPLE)
++set( _fuse_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
++if(WIN32)
++	set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
++else()
++	set(CMAKE_FIND_LIBRARY_SUFFIXES .a )
++endif()
+ 
+ # find includes
+-find_path (FUSE_INCLUDE_DIR fuse.h
+-        PATHS /opt /opt/local /usr/pkg
+-        PATH_SUFFIXES ${FUSE_SUFFIXES})
++find_path (FUSE_INCLUDE_DIR fuse.h)
+ 
+ # find lib
+-find_library (FUSE_LIBRARIES NAMES ${FUSE_NAMES})
++find_library (FUSE_LIBRARIES NAMES fuse fuse3 PATH_SUFFIXES lib)
++if (FUSE_LIBRARIES_NOTFOUND AND NOT FUSE_USE_STATIC_LIBS)
++	set(CMAKE_FIND_LIBRARY_SUFFIXES ${_fuse_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
++	find_library (FUSE_LIBRARIES fuse PATH_SUFFIXES lib)
++endif()
+ 
+ include ("FindPackageHandleStandardArgs")
+ find_package_handle_standard_args ("FUSE" DEFAULT_MSG
+

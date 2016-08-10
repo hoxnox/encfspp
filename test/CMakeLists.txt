@@ -1,5 +1,5 @@
-# @author $username$ <$usermail$>
-# @date $date$
+# @author hoxnox <hoxnox@gmail.com>
+# @date 20160810 15:03:46
 # libencfs cmake tests build script
 
 find_package(Threads)
@@ -51,15 +51,18 @@ if (NOT USE_SYSTEM_GTEST)
     set(GTEST_INCLUDE_DIRS ${SOURCE_DIR}/include)
     set(GTEST_LIBRARIES ${BINARY_DIR}/libgtest.a)
 else ()
+	add_custom_target(gtestlib)
     find_package(GTest REQUIRED)
 endif()
 include_directories(${GTEST_INCLUDE_DIRS})
 list(APPEND LIBRARIES ${GTEST_LIBRARIES})
 
+include_directories("${PROJECT_SOURCE_DIR}/src")
+include_directories(${GTEST_INCLUDE_DIRS})
 set(TEST_UNIT_SRC
         test.cpp)
 add_executable(test_unit_${PROJECT_NAME} ${TEST_UNIT_SRC})
 add_dependencies(test_unit_${PROJECT_NAME} gtestlib)
-target_link_libraries(test_unit_${PROJECT_NAME} ${LIBRARIES})
+target_link_libraries(test_unit_${PROJECT_NAME} encfs ${LIBRARIES})
 add_gtests("unit" "${TEST_UNIT_SRC}")
 
