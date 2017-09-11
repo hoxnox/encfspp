@@ -52,6 +52,18 @@ else()
 endif()
 
 ########################################################################
+# pluggable logging
+
+# replace logging.hpp
+if (NOT WITH_LOG)
+	set(WITH_LOG "${PROJECT_BINARY_DIR}/log")
+	configure_file("${PROJECT_SOURCE_DIR}/src/Logging.hpp" "${PROJECT_BINARY_DIR}/log/logging.hpp" COPYONLY)
+	include_directories(BEFORE "${PROJECT_BINARY_DIR}/log")
+else()
+	include_directories(BEFORE "${WITH_LOG}")
+endif()
+
+########################################################################
 # openssl
 
 if (WITH_SYSTEM_OPENSSL)
@@ -197,7 +209,7 @@ list(APPEND LIBRARIES
 ########################################################################
 # libencfs
 
-add_library(encfs src/EncfsMounter.cpp)
+add_library(encfs src/EncfsMounter.cpp src/Logging.cpp)
 add_dependencies(encfs encfs-original)
 include_directories("${STAGING_DIR}/include")
 include_directories("${PROJECT_SOURCE_DIR}/include")

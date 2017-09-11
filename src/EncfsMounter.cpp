@@ -178,5 +178,4 @@ EncfsMounter::StrError() const
 
 } // namespace
 
-INITIALIZE_EASYLOGGINGPP
 

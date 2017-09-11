@@ -10,11 +10,15 @@ class TestEncfsMounter : public ::testing::Test
 protected:
 	void SetUp()
 	{
+		errlog.str("");
 	}
 	void TearDown()
 	{
+		EXPECT_TRUE(errlog.str().empty()) << errlog.str();
 	}
 };
+
+
 
 TEST_F(TestEncfsMounter, general)
 {
