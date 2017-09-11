@@ -153,15 +153,18 @@ if (WITH_SYSTEM_ENCFS)
 	find_package(ENCFS REQUIRED)
 else()
 	if (VENDOR_DIR)
-		set(ENCFS_URL "file:///${VENDOR_DIR}/vgough/encfs/encfs-1.9-rc1.tar.gz")
+		#set(ENCFS_URL "file:///${VENDOR_DIR}/vgough/encfs/encfs-1.9-rc1.tar.gz")
+		set(ENCFS_URL "file:///${VENDOR_DIR}/vgough/encfs/encfs-1.9.2.tar.gz")
 	else ()
-		set(ENCFS_URL "https://github.com/vgough/encfs/archive/v1.9-rc1.tar.gz")
+		#set(ENCFS_URL "https://github.com/vgough/encfs/archive/v1.9-rc1.tar.gz")
+		set(ENCFS_URL "https://github.com/vgough/encfs/releases/download/v1.9.2/encfs-1.9.2.tar.gz")
 	endif ()
 	include(ExternalProject)
 	if (ANDROID_TOOLCHAIN)
 		ExternalProject_Add(encfs-original
 			URL ${ENCFS_URL}
-			URL_HASH SHA256=ff16b824fdf613d69bb252fbe024a2ebcc9046e36fc639790182e19877067a44
+			# URL_HASH SHA256=ff16b824fdf613d69bb252fbe024a2ebcc9046e36fc639790182e19877067a44
+			URL_HASH SHA256=cd9e972cd9565cdc26473c86d2c77c98de31fc6f604fa7d149dd5d6e35d46eaa
 			PATCH_COMMAND cat "${PROJECT_SOURCE_DIR}/cmake/files/encfs-1.9-rc1-*" | patch -p1
 			CONFIGURE_COMMAND cmake -DCMAKE_C_FLAGS="-D__ANDROID__ -DBUILD_NLS=0 -fPIE -fPIC"
 				-DCMAKE_EXE_LINKER_FLAGS="-pie" -DFUSE_USE_STATIC_LIBS=True
@@ -171,18 +174,22 @@ else()
 				-DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER
 				-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY
 				-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY
+				-DINSTALL_LIBENCFS=True
 				-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> <SOURCE_DIR>
-			INSTALL_COMMAND make install && cp -r <SOURCE_DIR>/encfs <INSTALL_DIR>/include && touch <INSTALL_DIR>/include/config.h
+			BUILD_IN_SOURCE 1
+			INSTALL_COMMAND make install && cp -r <SOURCE_DIR>/encfs <INSTALL_DIR>/include && cp <SOURCE_DIR>/config.h <INSTALL_DIR>/include/encfs/config.h
 			DEPENDS openssl fuse
 			INSTALL_DIR ${STAGING_DIR}
 		)
 	else()
 		ExternalProject_Add(encfs-original
 			URL ${ENCFS_URL}
-			URL_HASH SHA256=ff16b824fdf613d69bb252fbe024a2ebcc9046e36fc639790182e19877067a44
+			#URL_HASH SHA256=ff16b824fdf613d69bb252fbe024a2ebcc9046e36fc639790182e19877067a44
+			URL_HASH SHA256=cd9e972cd9565cdc26473c86d2c77c98de31fc6f604fa7d149dd5d6e35d46eaa
 			PATCH_COMMAND cat
-				"${PROJECT_SOURCE_DIR}/cmake/files/encfs-1.9-rc1-no_executables.patch"
-				"${PROJECT_SOURCE_DIR}/cmake/files/encfs-1.9-rc1-staticlibs.patch"
+				"${PROJECT_SOURCE_DIR}/cmake/files/encfs-1.9-rc1-01-no_executables.patch"
+				"${PROJECT_SOURCE_DIR}/cmake/files/encfs-1.9-rc1-03-static_libfuse.patch"
+				"${PROJECT_SOURCE_DIR}/cmake/files/encfs-1.9-rc1-04-easylogging_update.patch"
 				| patch -p1
 			CONFIGURE_COMMAND cmake -DCMAKE_C_FLAGS="-DBUILD_NLS=0"
 				-DFUSE_USE_STATIC_LIBS=True
@@ -190,8 +197,10 @@ else()
 				-DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER
 				-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY
 				-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY
+				-DINSTALL_LIBENCFS=True
 				-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> <SOURCE_DIR>
-			INSTALL_COMMAND make install && cp -r <SOURCE_DIR>/encfs <SOURCE_DIR>/internal <INSTALL_DIR>/include && touch <INSTALL_DIR>/include/config.h
+			BUILD_IN_SOURCE 1
+			INSTALL_COMMAND make install && cp -r <SOURCE_DIR>/encfs <SOURCE_DIR>/internal <INSTALL_DIR>/include && cp <SOURCE_DIR>/config.h <INSTALL_DIR>/include/encfs/config.h
 			DEPENDS openssl fuse
 			INSTALL_DIR ${STAGING_DIR}
 		)
@@ -209,7 +218,7 @@ list(APPEND LIBRARIES
 ########################################################################
 # libencfs
 
-add_library(encfs src/EncfsMounter.cpp src/Logging.cpp)
+add_library(encfs src/EncfsMounter.cpp)
 add_dependencies(encfs encfs-original)
 include_directories("${STAGING_DIR}/include")
 include_directories("${PROJECT_SOURCE_DIR}/include")

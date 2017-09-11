@@ -7,6 +7,7 @@
 #include <string>
 #include <cstring>
 #include <thread>
+#include <logging.hpp>
 
 #define FUSE_USE_VERSION 26
 #include <fuse.h>

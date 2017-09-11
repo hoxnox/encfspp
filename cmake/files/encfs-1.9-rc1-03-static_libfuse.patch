@@ -1,35 +1,27 @@
+From 970a4b7a7d4338c08667ddab96eb92c252ca6d76 Mon Sep 17 00:00:00 2001
+From: hoxnox <hoxnox@gmail.com>
+Date: Mon, 11 Sep 2017 10:59:11 +0300
+Subject: [PATCH 2/2] staticlibs
+
+---
+ cmake/FindFUSE.cmake | 17 +++++++++++++----
+ 1 file changed, 13 insertions(+), 4 deletions(-)
+
 diff --git a/cmake/FindFUSE.cmake b/cmake/FindFUSE.cmake
-index b1e8861..80276f6 100644
+index d854834..5da5e28 100644
 --- a/cmake/FindFUSE.cmake
 +++ b/cmake/FindFUSE.cmake
-@@ -1,5 +1,9 @@
- # Find the FUSE includes and library
- #
-+#  input:
-+#  FUSE_USE_STATIC_LIBS
-+#  Use CMAKE_FIND_ROOT_PATH for ROOT specification
-+#
- #  FUSE_INCLUDE_DIR - where to find fuse.h, etc.
- #  FUSE_LIBRARIES   - List of libraries when using FUSE.
- #  FUSE_FOUND       - True if FUSE lib is found.
-@@ -9,21 +13,22 @@ if (FUSE_INCLUDE_DIR)
-         SET (FUSE_FIND_QUIETLY TRUE)
- endif (FUSE_INCLUDE_DIR)
+@@ -21,13 +21,22 @@ else (APPLE)
+     set (FUSE_SUFFIXES fuse refuse)
+ endif (APPLE)
  
--if (APPLE)
--    set (FUSE_NAMES libosxfuse.dylib fuse)
--    set (FUSE_SUFFIXES osxfuse fuse)
--else (APPLE)
--    set (FUSE_NAMES fuse)
--    set (FUSE_SUFFIXES fuse)
--endif (APPLE)
 +set( _fuse_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
 +if(WIN32)
 +	set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
 +else()
 +	set(CMAKE_FIND_LIBRARY_SUFFIXES .a )
 +endif()
- 
++
  # find includes
 -find_path (FUSE_INCLUDE_DIR fuse.h
 -        PATHS /opt /opt/local /usr/pkg
@@ -46,4 +38,6 @@ index b1e8861..80276f6 100644
  
  include ("FindPackageHandleStandardArgs")
  find_package_handle_standard_args ("FUSE" DEFAULT_MSG
+-- 
+2.13.0
 
