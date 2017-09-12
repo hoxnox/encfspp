@@ -26,7 +26,6 @@ extern "C" void fuse_unmount_compat22(const char *mountpoint);
 
 namespace libencfs {
 
-
 using namespace encfs;
 
 class EncfsMounterImpl
@@ -66,6 +65,9 @@ EncfsMounter::EncfsMounter(std::string encrypted_dir_path, std::string mount_dir
              std::string password, std::string config_file_path /*= ""*/)
 	: impl_(new EncfsMounterImpl())
 {
+	VLOG << "Attempt to mount \"" << encrypted_dir_path
+	     << "\" to \"" << mount_dir_path << "\""
+	     << " with config \"" << config_file_path << "\"";
 	fuse_operations encfs_oper;
 	memset(&encfs_oper, 0, sizeof(fuse_operations));
 	
@@ -108,6 +110,11 @@ EncfsMounter::EncfsMounter(std::string encrypted_dir_path, std::string mount_dir
 	//opts->useStdin = true;
 	auto ctx = std::shared_ptr<EncFS_Context>(new EncFS_Context);
 	ctx->publicFilesystem = opts->ownerCreate;
+	if (setenv("ENCFS6_CONFIG", config_file_path.c_str(), 1) != 0)
+	{
+		LOG(ERROR) << "Error setting configuration file path.";
+		return;
+	}
 	RootPtr rootInfo = initFS(ctx.get(), opts);
 	if (!rootInfo)
 	{

@@ -15,6 +15,8 @@ protected:
 	void TearDown()
 	{
 		EXPECT_TRUE(errlog.str().empty()) << errlog.str();
+        std::cout << inflog.str();
+		std::cout << vrblog.str();
 	}
 };
 

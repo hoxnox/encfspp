@@ -24,7 +24,7 @@ project(libencfs)
 set(libencfs_VERSION_MAJOR 0)
 set(libencfs_VERSION_MINOR 0)
 set(libencfs_VERSION_PATCH 1)
-set(libencfs_TEST_SAMPLES_DIR "${PROJECT_SOURCE_DIR}/test/samples/")
+set(libencfs_TEST_SAMPLES_DIR "${PROJECT_SOURCE_DIR}/test/samples")
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
@@ -191,7 +191,7 @@ else()
 				"${PROJECT_SOURCE_DIR}/cmake/files/encfs-1.9-rc1-03-static_libfuse.patch"
 				"${PROJECT_SOURCE_DIR}/cmake/files/encfs-1.9-rc1-04-easylogging_update.patch"
 				| patch -p1
-			CONFIGURE_COMMAND cmake -DCMAKE_C_FLAGS="-DBUILD_NLS=0"
+			CONFIGURE_COMMAND cmake -DCMAKE_C_FLAGS="-DBUILD_NLS=0" -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
 				-DFUSE_USE_STATIC_LIBS=True
 				-DCMAKE_FIND_ROOT_PATH=${STAGING_DIR}
 				-DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER
@@ -208,8 +208,12 @@ else()
 	set(ENCFS_LIBRARIES
 		${STAGING_DIR}/lib/libencfs.a)
 endif()
+
+add_library(rpp  src/readpassphrase.c)
+add_dependencies(encfs-original rpp)
+
 list(APPEND LIBRARIES
-	${ENCFS_LIBRARIES}
+	${ENCFS_LIBRARIES} rpp
 	${STAGING_DIR}/lib64/libtinyxml2.a
 	${OPENSSL_LIBRARIES}
 	${FUSE_LIBRARIES} 
