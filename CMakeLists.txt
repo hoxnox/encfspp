@@ -26,7 +26,7 @@ set(libencfs_VERSION_MINOR 0)
 set(libencfs_VERSION_PATCH 1)
 set(libencfs_TEST_SAMPLES_DIR "${PROJECT_SOURCE_DIR}/test/samples")
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 # configuration header
