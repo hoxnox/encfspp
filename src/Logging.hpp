@@ -2,7 +2,7 @@
 #define __LOGGING_GUARD__
 
 #define ELPP_THREAD_SAFE
-#include <internal/easylogging++.h>
+#include <encfs/Error.h>
 
 #ifndef _
 #define _(X) (X)
@@ -11,6 +11,7 @@
 void inline
 init_logging(int level)
 {
+	encfs::initLogging(level > 0 ? true : false, false);
 	el::Loggers::addFlag(el::LoggingFlag::HierarchicalLogging);
 	el::Loggers::setLoggingLevel(el::Level::Fatal);
 	el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format,

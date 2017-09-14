@@ -31,8 +31,6 @@ public:
 	/**@name utils
 	 * @{*/
 	bool IsMounted() const;
-	std::string MountDirPath() const;
-	std::string StrError() const;
 	/**@}*/
 
 	/**@name service

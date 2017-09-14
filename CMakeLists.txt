@@ -51,6 +51,8 @@ else()
 		message(STATUS "VENDOR_DIR: ${VENDOR_DIR}")
 endif()
 
+include(sanitizers)
+
 ########################################################################
 # pluggable logging
 
@@ -209,7 +211,7 @@ else()
 		${STAGING_DIR}/lib/libencfs.a)
 endif()
 
-add_library(rpp  src/readpassphrase.c)
+add_library(rpp  src/readpassphrase.cpp)
 add_dependencies(encfs-original rpp)
 
 list(APPEND LIBRARIES

@@ -84,6 +84,7 @@ private:
 	fuse_operations encfs_oper;
 	std::shared_ptr<EncFS_Opts> opts{new EncFS_Opts};
 	std::shared_ptr<EncFS_Context> ctx{new EncFS_Context};
+	RootPtr rootInfo;
 	struct fuse *fuse{nullptr};
 friend class EncfsMounter;
 };
@@ -123,40 +124,46 @@ EncfsMounter::EncfsMounter(std::string encrypted_dir_path, std::string mount_dir
 		LOG(ERROR) << "Error setting configuration file path.";
 		return;
 	}
-	RootPtr rootInfo = initFS(impl_->ctx.get(), impl_->opts);
-	if (!rootInfo)
+	impl_->rootInfo = initFS(impl_->ctx.get(), impl_->opts);
+	if (!impl_->rootInfo)
 	{
 		LOG(ERROR) << "Error initializing filesystem.";
 		return;
 	}
-	impl_->ctx->setRoot(rootInfo->root);
+	impl_->ctx->setRoot(impl_->rootInfo->root);
 	impl_->ctx->opts = impl_->opts;
 	umask(0);
 
-	std::promise<void> start_notifier;
-	impl_->thread.reset(new std::thread([this, &start_notifier]()
+    std::promise<void> start_notifier;
+	std::future<void> start_waiter = start_notifier.get_future();
+	impl_->thread.reset(new std::thread([this](std::promise<void>&& start_notifier)
 		{
-			char* mountpoint = new char[impl_->mountpoint.length()];
-            std::copy(impl_->mountpoint.begin(), impl_->mountpoint.end(), mountpoint);
+			//char* mountpoint = new char[impl_->mountpoint.length()];
+			// std::copy(impl_->mountpoint.begin(), impl_->mountpoint.end(), mountpoint);
 			char name[] = {'l', 'i', 'b', 'e', 'n', 'c', 'f', 's', '\0'};
 			char minus_f[] = {'-', 'f', '\0'};
-			char* fuse_argv[4] = { name, minus_f, mountpoint, nullptr };
+			char* fuse_argv[4] = { name, minus_f, const_cast<char*>(impl_->mountpoint.data()), nullptr };
 			int fuse_argc = 3;
 			int multithreaded = 0;
+			char* mountpoint  = nullptr;
 			impl_->fuse = fuse_setup(fuse_argc, fuse_argv, &impl_->encfs_oper, sizeof(impl_->encfs_oper),
 					&mountpoint, &multithreaded, (void*)impl_->ctx.get());
 			if (impl_->fuse == nullptr)
 				return;
-            start_notifier.set_value();
+			start_notifier.set_value();
 			int res = fuse_loop(impl_->fuse);
 			if (res != 0)
 			{
 				LOG(ERROR) << "Error in fuse_loop. "
 				           << "Message: " << strerror(errno);
 			}
-			//fuse_teardown(fuse, impl_->mountpoint);
-		}));
-	start_notifier.get_future().get();
+			fuse_teardown(impl_->fuse, mountpoint);
+			impl_->rootInfo.reset();
+			impl_->ctx->setRoot(std::shared_ptr<DirNode>());
+			MemoryPool::destroyAll();
+		}, std::move(start_notifier)));
+	if(start_waiter.valid())
+        start_waiter.wait();
 }
 
 EncfsMounter::~EncfsMounter()
@@ -172,20 +179,6 @@ EncfsMounter::IsMounted() const
 {
 	// TODO: check if mounted
 	return false;
-}
-
-std::string
-EncfsMounter::MountDirPath() const
-{
-	// TODO:
-	return "";
-}
-
-std::string
-EncfsMounter::StrError() const
-{
-	// TODO:
-	return "";
 }
 
 } // namespace
