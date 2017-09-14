@@ -89,12 +89,15 @@ private:
 friend class EncfsMounter;
 };
 
+std::function<std::string(std::string promt)> EncfsMounter::readpassphrase_ = {};
+
 std::unique_ptr<EncfsMounter>&&
-EncfsMounter::Mount(std::string encrypted_dir_path, std::string mount_dir_path,
-                    std::string password, std::string config_file_path /*= ""*/)
+EncfsMounter::Mount(std::string enc_dir_path,
+                    std::string mnt_dir_path,
+                    std::string cfg_file_path /*= ""*/)
 {
-	return std::move(std::unique_ptr<EncfsMounter>(new EncfsMounter(
-		encrypted_dir_path, mount_dir_path, password, config_file_path)));
+	return std::move(std::unique_ptr<EncfsMounter>(
+		new EncfsMounter(enc_dir_path, mnt_dir_path, cfg_file_path)));
 }
 
 
@@ -107,7 +110,7 @@ slashTerminate(const std::string &src)
 }
 
 EncfsMounter::EncfsMounter(std::string encrypted_dir_path, std::string mount_dir_path,
-             std::string password, std::string config_file_path /*= ""*/)
+             std::string config_file_path /*= ""*/)
 	: impl_(new EncfsMounterImpl())
 {
 	VLOG << "Attempt to mount \"" << encrypted_dir_path

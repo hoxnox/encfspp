@@ -10,6 +10,8 @@ class TestEncfsMounter : public ::testing::Test
 protected:
 	void SetUp()
 	{
+		EncfsMounter::set_readpassphrase(
+			[](std::string prompt) -> std::string { return "testpass"; });
 		errlog.str("");
 	}
 	void TearDown()
@@ -25,7 +27,6 @@ TEST_F(TestEncfsMounter, read)
 {
 	EncfsMounter mounter(libencfs_TEST_SAMPLES_DIR + "/encrypted",
 	                     libencfs_TEST_SAMPLES_DIR + "/mountpoint",
-	                     "testpass",
 	                     libencfs_TEST_SAMPLES_DIR + "/config");
 	std::ifstream file(libencfs_TEST_SAMPLES_DIR + "/mountpoint/testfile");
 	ASSERT_TRUE(file.is_open());
@@ -39,7 +40,6 @@ TEST_F(TestEncfsMounter, write_read)
 	{
 		EncfsMounter mounter(libencfs_TEST_SAMPLES_DIR + "/encrypted",
 							 libencfs_TEST_SAMPLES_DIR + "/mountpoint",
-							 "testpass",
 							 libencfs_TEST_SAMPLES_DIR + "/config");
 		std::ofstream file(libencfs_TEST_SAMPLES_DIR + "/mountpoint/testfile2");
 		ASSERT_TRUE(file.is_open());
@@ -52,7 +52,6 @@ TEST_F(TestEncfsMounter, write_read)
 	{
 		EncfsMounter mounter(libencfs_TEST_SAMPLES_DIR + "/encrypted",
 							 libencfs_TEST_SAMPLES_DIR + "/mountpoint",
-							 "testpass",
 							 libencfs_TEST_SAMPLES_DIR + "/config");
 		std::ifstream file(libencfs_TEST_SAMPLES_DIR + "/mountpoint/testfile2");
 		ASSERT_TRUE(file.is_open());

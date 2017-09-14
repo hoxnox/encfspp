@@ -52,6 +52,7 @@ else()
 endif()
 
 include(sanitizers)
+include(vendoring)
 
 ########################################################################
 # pluggable logging

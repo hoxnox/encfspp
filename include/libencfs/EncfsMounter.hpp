@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include <functional>
 
 #pragma once
 
@@ -14,13 +15,25 @@ class EncfsMounterImpl;
 class EncfsMounter
 {
 public:
+	static void set_readpassphrase(std::function<std::string(std::string)> readpassphrase)
+	{
+		readpassphrase_ = readpassphrase;
+	}
+	static std::string readpassphrase(std::string prompt)
+	{
+		return readpassphrase_(prompt);
+	}
+
 	/**@name mount
 	 * @{*/
 	static std::unique_ptr<EncfsMounter>&&
-	Mount(std::string encrypted_dir_path, std::string mount_dir_path,
-	      std::string password, std::string config_file_path = "");
-	EncfsMounter(std::string encrypted_dir_path, std::string mount_dir_path,
-	             std::string password, std::string config_file_path = "");
+	Mount(std::string encrypted_dir_path,
+	      std::string mount_dir_path,
+	      std::string config_file_path = "");
+
+	EncfsMounter(std::string encrypted_dir_path,
+	             std::string mount_dir_path,
+	             std::string config_file_path = "");
 	/**@}*/
 
 	/**@name umount
@@ -44,6 +57,7 @@ private:
 	EncfsMounter(const EncfsMounter& copy) = delete;
 	EncfsMounter& operator=(const EncfsMounter& move) = delete;
 	EncfsMounterImpl* impl_;
+	static std::function<std::string(std::string promt)> readpassphrase_;
 };
 
 } // namespace
