@@ -1,4 +1,4 @@
 *.swp
 *.swo
 build
-src/$NULL$_config.h
+src/libencfs_config.h
