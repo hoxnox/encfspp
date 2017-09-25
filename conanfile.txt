@@ -1,0 +1,10 @@
+[requires]
+libencfs/1.9.2@hoxnox/stable
+libfuse/2.9.7@hoxnox/stable
+gtest/1.8.0@hoxnox/stable
+
+[options]
+libfuse:shared=False
+
+[generators]
+cmake
