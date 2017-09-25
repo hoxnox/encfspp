@@ -1,5 +1,4 @@
-# @author hoxnox <hoxnox@gmail.com>
-# @date 20160719 12:09:57
+# @author hoxnox <hoxnox@gmail.com> # @date 20160719 12:09:57
 # libencfs cmake build script
 
 cmake_minimum_required(VERSION 3.1.0)
@@ -9,12 +8,6 @@ cmake_minimum_required(VERSION 3.1.0)
 
 option(WITH_TESTS               "Build tests."  OFF)
 option(WITH_DOCS                "Generate docs" OFF)
-option(WITH_SYSTEM_FUSE         "Don't build libfuse" OFF)
-option(WITH_SYSTEN_ENCFS        "Don't build encfs" OFF)
-option(WITH_SYSTEM_OPENSSSL     "Don't build openssl" OFF)
-option(ANDROID_TOOLCHAIN        "Path to Android toolchain" "")
-option(ANDROID_TOOLCHAIN_PREFIX "Prefix for utilites"       "")
-option(VENDOR_DIR               "Local directory with dependencies" "")
 
 ########################################################################
 # general
@@ -42,17 +35,13 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}"
 include_directories("${PROJECT_SOURCE_DIR}/src")
 set(STAGING_DIR "${CMAKE_BINARY_DIR}/staging")
 
-if (NOT VENDOR_DIR)
-	if (DEFINED ENV{VENDOR_DIR})
-		set(VENDOR_DIR $ENV{VENDOR_DIR})
-		message(STATUS "VENDOR_DIR: ${VENDOR_DIR}")
-	endif()
-else()
-		message(STATUS "VENDOR_DIR: ${VENDOR_DIR}")
-endif()
-
 include(sanitizers)
-include(vendoring)
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
+find_package(Threads REQUIRED)
+list(APPEND LIBRARIES ${CONAN_LIBS} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS})
 
 ########################################################################
 # pluggable logging
@@ -67,169 +56,17 @@ else()
 endif()
 
 ########################################################################
-# openssl
-
-if (WITH_SYSTEM_OPENSSL)
-	if(NOT OPENSSL_ROOT)
-		set(OPENSSL_ROOT $ENV{OPENSSL_ROOT})
-	endif()
-	find_package(OpenSSL REQUIRED)
-else()
-	if (VENDOR_DIR)
-		set(OPENSSL_URL "file:///${VENDOR_DIR}/openssl/openssl/openssl-1.0.1t.tar.gz")
-	else ()
-		set(OPENSSL_URL "https://www.openssl.org/source/openssl-1.0.1t.tar.gz")
-	endif ()
-	include(ExternalProject)
-	ExternalProject_Add(openssl
-		URL ${OPENSSL_URL}
-		URL_HASH SHA256=4a6ee491a2fdb22e519c76fdc2a628bb3cec12762cd456861d207996c8a07088
-		CONFIGURE_COMMAND ""
-		BUILD_COMMAND "${PROJECT_SOURCE_DIR}/cmake/files/openssl-build.sh" "${STAGING_DIR}" "${ANDROID_TOOLCHAIN}" 
-		INSTALL_COMMAND ""
-		BUILD_IN_SOURCE 1
-	)
-	set(OPENSSL_LIBRARIES
-		${STAGING_DIR}/lib/libcrypto.a
-		${STAGING_DIR}/lib/libssl.a)
-endif()
-
-########################################################################
-# fuse
-
-if (WITH_SYSTEM_FUSE)
-	if(NOT FUSE_ROOT)
-		set(FUSE_ROOT $ENV{FUSE_ROOT})
-	endif()
-	find_package(FUSE REQUIRED)
-else()
-	if (VENDOR_DIR)
-		set(FUSE_URL "file:///${VENDOR_DIR}/libfuse/libfuse/fuse-2.9.7.tar.gz")
-	else ()
-		set(FUSE_URL "https://github.com/libfuse/libfuse/releases/download/fuse-2.9.7/fuse-2.9.7.tar.gz")
-	endif ()
-	
-	include(ExternalProject)
-	if (ANDROID_TOOLCHAIN)
-		if (NOT ANDROID_TOOLCHAIN_PREFIX)
-			execute_process(COMMAND /bin/bash -c "basename ${ANDROID_TOOLCHAIN}/bin/*gcc"
-				OUTPUT_VARIABLE GCC_NAME_FROM_TOOLCHAIN)
-			string(FIND ${GCC_NAME_FROM_TOOLCHAIN} "-" LAST_HYPEN REVERSE)
-			string(SUBSTRING ${GCC_NAME_FROM_TOOLCHAIN} 0 ${LAST_HYPEN} ANDROID_TOOLCHAIN_PREFIX_CALCULATED)
-			message(STATUS "Caclulated toolchain prefix: ${ANDROID_TOOLCHAIN_PREFIX_CALCULATED}")
-			set(ANDROID_TOOLCHAIN_PREFIX ${ANDROID_TOOLCHAIN_PREFIX_CALCULATED})
-		endif ()
-		ExternalProject_Add(fuse
-			URL ${FUSE_URL}
-			URL_HASH SHA256=832432d1ad4f833c20e13b57cf40ce5277a9d33e483205fc63c78111b3358874
-			PATCH_COMMAND patch -p1 < "${PROJECT_SOURCE_DIR}/cmake/files/fuse-2.9.7.patch"
-			CONFIGURE_COMMAND ./configure CFLAGS=-D__ANDROID__ --disable-shared
-				--enable-static --host=${ANDROID_TOOLCHAIN_PREFIX}
-				--with-sysroot=${ANDROID_TOOLCHAIN}/sysroot --disable-example
-				--disable-util --prefix=<INSTALL_DIR>
-			INSTALL_DIR ${STAGING_DIR}
-			BUILD_IN_SOURCE 1
-		)
-	else()
-		ExternalProject_Add(fuse
-			URL ${FUSE_URL}
-			URL_HASH SHA256=832432d1ad4f833c20e13b57cf40ce5277a9d33e483205fc63c78111b3358874
-			CONFIGURE_COMMAND ./configure --disable-shared --enable-static
-				--disable-shared --enable-static --disable-example
-				--disable-util --prefix=<INSTALL_DIR>
-			INSTALL_DIR ${STAGING_DIR}
-			BUILD_IN_SOURCE 1
-		)
-	endif()
-	set(FUSE_LIBRARIES
-		${STAGING_DIR}/lib/libfuse.a)
-endif()
-add_definitions("-D_FILE_OFFSET_BITS=64")
-
-########################################################################
-# encfs
-
-if (WITH_SYSTEM_ENCFS)
-	if(NOT ENCFS_ROOT)
-		set(ENCFS_ROOT $ENV{ENCFS_ROOT})
-	endif()
-	find_package(ENCFS REQUIRED)
-else()
-	if (VENDOR_DIR)
-		#set(ENCFS_URL "file:///${VENDOR_DIR}/vgough/encfs/encfs-1.9-rc1.tar.gz")
-		set(ENCFS_URL "file:///${VENDOR_DIR}/vgough/encfs/encfs-1.9.2.tar.gz")
-	else ()
-		#set(ENCFS_URL "https://github.com/vgough/encfs/archive/v1.9-rc1.tar.gz")
-		set(ENCFS_URL "https://github.com/vgough/encfs/releases/download/v1.9.2/encfs-1.9.2.tar.gz")
-	endif ()
-	include(ExternalProject)
-	if (ANDROID_TOOLCHAIN)
-		ExternalProject_Add(encfs-original
-			URL ${ENCFS_URL}
-			# URL_HASH SHA256=ff16b824fdf613d69bb252fbe024a2ebcc9046e36fc639790182e19877067a44
-			URL_HASH SHA256=cd9e972cd9565cdc26473c86d2c77c98de31fc6f604fa7d149dd5d6e35d46eaa
-			PATCH_COMMAND cat "${PROJECT_SOURCE_DIR}/cmake/files/encfs-1.9-rc1-*" | patch -p1
-			CONFIGURE_COMMAND cmake -DCMAKE_C_FLAGS="-D__ANDROID__ -DBUILD_NLS=0 -fPIE -fPIC"
-				-DCMAKE_EXE_LINKER_FLAGS="-pie" -DFUSE_USE_STATIC_LIBS=True
-				-DCMAKE_C_COMPILER=${ANDROID_TOOLCHAIN}/bin/${ANDROID_TOOLCHAIN_PREFIX}-gcc
-				-DCMAKE_CXX_COMPILER=${ANDROID_TOOLCHAIN}/bin/${ANDROID_TOOLCHAIN_PREFIX}-g++
-				-DCMAKE_FIND_ROOT_PATH=${STAGING_DIR}
-				-DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER
-				-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY
-				-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY
-				-DINSTALL_LIBENCFS=True
-				-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> <SOURCE_DIR>
-			BUILD_IN_SOURCE 1
-			INSTALL_COMMAND make install && cp -r <SOURCE_DIR>/encfs <INSTALL_DIR>/include && cp <SOURCE_DIR>/config.h <INSTALL_DIR>/include/encfs/config.h
-			DEPENDS openssl fuse
-			INSTALL_DIR ${STAGING_DIR}
-		)
-	else()
-		ExternalProject_Add(encfs-original
-			URL ${ENCFS_URL}
-			#URL_HASH SHA256=ff16b824fdf613d69bb252fbe024a2ebcc9046e36fc639790182e19877067a44
-			URL_HASH SHA256=cd9e972cd9565cdc26473c86d2c77c98de31fc6f604fa7d149dd5d6e35d46eaa
-			PATCH_COMMAND cat
-				"${PROJECT_SOURCE_DIR}/cmake/files/encfs-1.9-rc1-01-no_executables.patch"
-				"${PROJECT_SOURCE_DIR}/cmake/files/encfs-1.9-rc1-03-static_libfuse.patch"
-				"${PROJECT_SOURCE_DIR}/cmake/files/encfs-1.9-rc1-04-easylogging_update.patch"
-				| patch -p1
-			CONFIGURE_COMMAND cmake -DCMAKE_C_FLAGS="-DBUILD_NLS=0" -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-				-DFUSE_USE_STATIC_LIBS=True
-				-DCMAKE_FIND_ROOT_PATH=${STAGING_DIR}
-				-DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER
-				-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY
-				-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY
-				-DINSTALL_LIBENCFS=True
-				-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> <SOURCE_DIR>
-			BUILD_IN_SOURCE 1
-			INSTALL_COMMAND make install && cp -r <SOURCE_DIR>/encfs <SOURCE_DIR>/internal <INSTALL_DIR>/include && cp <SOURCE_DIR>/config.h <INSTALL_DIR>/include/encfs/config.h
-			DEPENDS openssl fuse
-			INSTALL_DIR ${STAGING_DIR}
-		)
-	endif()
-	set(ENCFS_LIBRARIES
-		${STAGING_DIR}/lib/libencfs.a)
-endif()
-
-add_library(rpp  src/readpassphrase.cpp)
-add_dependencies(encfs-original rpp)
-
-list(APPEND LIBRARIES
-	${ENCFS_LIBRARIES} rpp
-	${STAGING_DIR}/lib64/libtinyxml2.a
-	${OPENSSL_LIBRARIES}
-	${FUSE_LIBRARIES} 
-	dl)
-
-########################################################################
 # libencfs
 
-add_library(encfs src/EncfsMounter.cpp)
-add_dependencies(encfs encfs-original)
+add_library(readpassphrase src/readpassphrase.cpp)
+list(APPEND LIBRARIES readpassphrase)
+
+add_library(encfspp src/EncfsMounter.cpp)
+add_dependencies(encfspp readpassphrase)
 include_directories("${STAGING_DIR}/include")
 include_directories("${PROJECT_SOURCE_DIR}/include")
-target_link_libraries(encfs ${LIBRARIES})
+target_link_libraries(encfspp ${LIBRARIES})
+set_property(TARGET encfspp PROPERTY COMPILE_DEFINITIONS "_FILE_OFFSET_BITS=64")
 
 ########################################################################
 # tests and docs
