@@ -7,8 +7,9 @@ cmake_minimum_required(VERSION 3.1.0)
 ########################################################################
 # options
 
-option(WITH_TESTS               "Build tests."  OFF)
-option(WITH_DOCS                "Generate docs" OFF)
+option(WITH_TESTS "Build tests."        OFF)
+option(WITH_DOCS  "Generate docs"       OFF)
+option(WITH_LOG   "Logging replacement" "")
 
 ########################################################################
 # general
@@ -17,7 +18,7 @@ project(encfspp)
 
 set(encfspp_VERSION_MAJOR 0)
 set(encfspp_VERSION_MINOR 0)
-set(encfspp_VERSION_PATCH 2)
+set(encfspp_VERSION_PATCH 3)
 set(encfspp_TEST_SAMPLES_DIR "${PROJECT_SOURCE_DIR}/test/samples")
 
 set(CMAKE_CXX_STANDARD 14)
@@ -44,6 +45,8 @@ conan_basic_setup()
 find_package(Threads REQUIRED)
 list(APPEND LIBRARIES ${CONAN_LIBS} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS})
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wformat=2 -Wnon-virtual-dtor -Wcast-qual")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused -Wno-unused-parameter -Wno-parentheses")
 ########################################################################
 # pluggable logging
 

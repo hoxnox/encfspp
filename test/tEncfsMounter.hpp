@@ -10,7 +10,7 @@ protected:
 	void SetUp()
 	{
 		EncfsMounter::set_readpassphrase(
-			[](std::string prompt) -> std::string { return "testpass"; });
+			[](std::string) -> std::string { return "testpass"; });
 		errlog.str("");
 	}
 	void TearDown()
