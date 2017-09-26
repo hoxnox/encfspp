@@ -1,12 +1,11 @@
-#include <libencfs/EncfsMounter.hpp>
-#include <libencfs_config.h>
+#include <EncfsMounter.hpp>
+#include <encfspp_config.h>
 #include <thread>
 #include <chrono>
 
-using namespace libencfs;
+using namespace encfspp;
 
-class TestEncfsMounter : public ::testing::Test
-{
+class TestEncfsMounter : public ::testing::Test {
 protected:
 	void SetUp()
 	{
@@ -25,10 +24,10 @@ protected:
 
 TEST_F(TestEncfsMounter, read)
 {
-	EncfsMounter mounter(libencfs_TEST_SAMPLES_DIR + "/encrypted",
-	                     libencfs_TEST_SAMPLES_DIR + "/mountpoint",
-	                     libencfs_TEST_SAMPLES_DIR + "/config");
-	std::ifstream file(libencfs_TEST_SAMPLES_DIR + "/mountpoint/testfile");
+	EncfsMounter mounter(encfspp_TEST_SAMPLES_DIR + "/encrypted",
+	                     encfspp_TEST_SAMPLES_DIR + "/mountpoint",
+	                     encfspp_TEST_SAMPLES_DIR + "/config");
+	std::ifstream file(encfspp_TEST_SAMPLES_DIR + "/mountpoint/testfile");
 	ASSERT_TRUE(file.is_open());
 	std::string fdata;
 	file >> fdata;
@@ -38,26 +37,26 @@ TEST_F(TestEncfsMounter, read)
 TEST_F(TestEncfsMounter, write_read)
 {
 	{
-		EncfsMounter mounter(libencfs_TEST_SAMPLES_DIR + "/encrypted",
-							 libencfs_TEST_SAMPLES_DIR + "/mountpoint",
-							 libencfs_TEST_SAMPLES_DIR + "/config");
-		std::ofstream file(libencfs_TEST_SAMPLES_DIR + "/mountpoint/testfile2");
+		EncfsMounter mounter(encfspp_TEST_SAMPLES_DIR + "/encrypted",
+							 encfspp_TEST_SAMPLES_DIR + "/mountpoint",
+							 encfspp_TEST_SAMPLES_DIR + "/config");
+		std::ofstream file(encfspp_TEST_SAMPLES_DIR + "/mountpoint/testfile2");
 		ASSERT_TRUE(file.is_open());
 		file << "tost";
 	}
 
-	std::ifstream file_(libencfs_TEST_SAMPLES_DIR + "/mountpoint/testfile2");
+	std::ifstream file_(encfspp_TEST_SAMPLES_DIR + "/mountpoint/testfile2");
 	ASSERT_FALSE(file_.is_open());
 
 	{
-		EncfsMounter mounter(libencfs_TEST_SAMPLES_DIR + "/encrypted",
-							 libencfs_TEST_SAMPLES_DIR + "/mountpoint",
-							 libencfs_TEST_SAMPLES_DIR + "/config");
-		std::ifstream file(libencfs_TEST_SAMPLES_DIR + "/mountpoint/testfile2");
+		EncfsMounter mounter(encfspp_TEST_SAMPLES_DIR + "/encrypted",
+							 encfspp_TEST_SAMPLES_DIR + "/mountpoint",
+							 encfspp_TEST_SAMPLES_DIR + "/config");
+		std::ifstream file(encfspp_TEST_SAMPLES_DIR + "/mountpoint/testfile2");
 		ASSERT_TRUE(file.is_open());
 		std::string fdata;
 		file >> fdata;
 		EXPECT_EQ("tost", fdata);
-        unlink((libencfs_TEST_SAMPLES_DIR + "/mountpoint/testfile2").c_str());
+        unlink((encfspp_TEST_SAMPLES_DIR + "/mountpoint/testfile2").c_str());
 	}
 }

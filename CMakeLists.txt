@@ -1,5 +1,6 @@
-# @author hoxnox <hoxnox@gmail.com> # @date 20160719 12:09:57
-# libencfs cmake build script
+# @author hoxnox <hoxnox@gmail.com>
+# @date 20160719 12:09:57
+# encfspp cmake build script
 
 cmake_minimum_required(VERSION 3.1.0)
 
@@ -12,20 +13,20 @@ option(WITH_DOCS                "Generate docs" OFF)
 ########################################################################
 # general
 
-project(libencfs)
+project(encfspp)
 
-set(libencfs_VERSION_MAJOR 0)
-set(libencfs_VERSION_MINOR 0)
-set(libencfs_VERSION_PATCH 1)
-set(libencfs_TEST_SAMPLES_DIR "${PROJECT_SOURCE_DIR}/test/samples")
+set(encfspp_VERSION_MAJOR 0)
+set(encfspp_VERSION_MINOR 0)
+set(encfspp_VERSION_PATCH 1)
+set(encfspp_TEST_SAMPLES_DIR "${PROJECT_SOURCE_DIR}/test/samples")
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 # configuration header
 configure_file(
-	"${PROJECT_SOURCE_DIR}/src/libencfs_config.cfg"
-	"${PROJECT_SOURCE_DIR}/src/libencfs_config.h"
+	"${PROJECT_SOURCE_DIR}/src/encfspp_config.cfg"
+	"${PROJECT_SOURCE_DIR}/src/encfspp_config.h"
 	ESCAPE_QUOTES
 )
 
@@ -56,7 +57,7 @@ else()
 endif()
 
 ########################################################################
-# libencfs
+# encfspp
 
 add_library(readpassphrase src/readpassphrase.cpp)
 list(APPEND LIBRARIES readpassphrase)
@@ -85,27 +86,17 @@ endif()
 
 set(CPACK_SET_DESTDIR ON)
 
-#INSTALL(TARGETS
-#	targetname
-#	DESTINATION bin)
-#INSTALL(FILES filepath DESTINATION bin
-#	PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-#	            GROUP_EXECUTE GROUP_READ
-#	            WORLD_READ WORLD_EXECUTE)
-#INSTALL(DIRECTORY domedir DESTINATION share/${PROJECT_NAME})
-SET(CPACK_PACKAGE_NAME libencfs)
-#if (WITH_SYSTEM_SOMELIB)
-#	SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libsomelib (>=1.1.1)")
-#	SET(CPACK_RPM_PACKAGE_REQUIRES "libsomelib >= 1.1.1")
-#endif()
+INSTALL(TARGETS encfspp readpassphrase DESTINATION lib)
+INSTALL(FILES include/EncfsMounter.hpp DESTINATION include)
+SET(CPACK_PACKAGE_NAME encfspp)
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "")
-SET(CPACK_PACKAGE_VENDOR "$uername$ <hoxnox@gmail.com>")
+SET(CPACK_PACKAGE_VENDOR "Merder Kim <hoxnox@gmail.com>")
 SET(CPACK_PACKAGE_CONTACT ${CPACK_PACKAGE_VENDOR})
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
 SET(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
-SET(CPACK_PACKAGE_VERSION_MAJOR ${libencfs_VERSION_MAJOR})
-SET(CPACK_PACKAGE_VERSION_MINOR ${libencfs_VERSION_MINOR})
-SET(CPACK_PACKAGE_VERSION_PATCH ${libencfs_VERSION_PATCH})
+SET(CPACK_PACKAGE_VERSION_MAJOR ${encfspp_VERSION_MAJOR})
+SET(CPACK_PACKAGE_VERSION_MINOR ${encfspp_VERSION_MINOR})
+SET(CPACK_PACKAGE_VERSION_PATCH ${encfspp_VERSION_PATCH})
 SET(CPACK_DEBIAN_PACKAGE_SECTION "misc")
 SET(CPACK_RPM_PACKAGE_GROUP "Applications/System")
 SET(CPACK_RPM_PACKAGE_LICENSE "MIT")

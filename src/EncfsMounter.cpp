@@ -24,9 +24,9 @@ extern "C" void fuse_unmount_compat22(const char *mountpoint);
 
 #include <openssl/crypto.h>
 
-#include <libencfs/EncfsMounter.hpp>
+#include <EncfsMounter.hpp>
 
-namespace libencfs {
+namespace encfspp {
 
 using namespace encfs;
 
