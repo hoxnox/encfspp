@@ -6,7 +6,7 @@
 
 extern "C"
 char*
-readpassphrase(const char *prompt, char *buf, size_t bufSize, int flags)
+readpassphrase(const char *prompt, char *buf, size_t bufSize, int)
 {
     std::string pass = encfspp::EncfsMounter::readpassphrase(prompt);
     if (bufSize < pass.size())

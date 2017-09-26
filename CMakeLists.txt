@@ -7,8 +7,9 @@ cmake_minimum_required(VERSION 3.1.0)
 ########################################################################
 # options
 
-option(WITH_TESTS               "Build tests."  OFF)
-option(WITH_DOCS                "Generate docs" OFF)
+option(WITH_TESTS "Build tests."        OFF)
+option(WITH_DOCS  "Generate docs"       OFF)
+option(WITH_LOG   "Logging replacement" "")
 
 ########################################################################
 # general
@@ -44,6 +45,8 @@ conan_basic_setup()
 find_package(Threads REQUIRED)
 list(APPEND LIBRARIES ${CONAN_LIBS} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS})
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wformat=2 -Wnon-virtual-dtor -Wcast-qual")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused -Wno-unused-parameter -Wno-parentheses")
 ########################################################################
 # pluggable logging
 

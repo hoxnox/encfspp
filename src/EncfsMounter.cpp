@@ -7,7 +7,6 @@
 #include <string>
 #include <cstring>
 #include <thread>
-#include <logging.hpp>
 #include <memory>
 #include <future>
 
@@ -25,6 +24,7 @@ extern "C" void fuse_unmount_compat22(const char *mountpoint);
 #include <openssl/crypto.h>
 
 #include <EncfsMounter.hpp>
+#include <logging.hpp>
 
 namespace encfspp {
 
