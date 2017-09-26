@@ -6,7 +6,7 @@ from shutil import copy
 class EncfsppConan(NxConanFile):
     name = "encfspp"
     description = "C++ wrapper on encfs"
-    version = "0.0.2"
+    version = "0.0.3"
     url = "https://github.com/hoxnox/encfspp"
     license = "http://github.com/hoxnox/encfspp/blob/master/LICENSE"
     settings = "os", "compiler", "build_type", "arch"
