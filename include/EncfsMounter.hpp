@@ -7,7 +7,7 @@
 
 #pragma once
 
-namespace libencfs{
+namespace encfspp{
 
 class EncfsMounterImpl;
 

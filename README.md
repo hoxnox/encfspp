@@ -1,63 +1,37 @@
-# libfuse
+# encfspp
 
 Easy to use library, used to simplify mounting of
-[encfs](https://github.com/vgough/encfs) directories from the code.
+[encfs](https://github.com/vgough/encfs) directories from your code.
 
 ## Building
 
-Use cmake to build the library.
+You need conan (see http://conan.io) and cmake to build the project.
 
-### Building for Android
-
-1. Install Android NDK according to your OS
-   [android NDK](https://developer.android.com/ndk/downloads/index.html)
-
-2. Prepare standalone toolchain for your Android:
-
-   ```sh
-   /opt/android-ndk/build/tools/make-standalone-toolchain.sh --arch=arm \
-   	--ndk-dir=/opt/android-ndk --install-dir=/home/user/devel/android/toolchain \
-   	--platform=android-21 --system=linux-x86_64
-   ```
-
-   set path accordingly
-
-   ```sh
-   export PATH=/home/user/devel/android/toolchain/bin:$PATH
-   ```
-
-3. Go to sources, configure and build:
-
-   ```sh
-   mkdir build && cd build
-   cmake -DANDROID_TOOLCHAIN=/home/user/devel/android/toolchain ..
-   make
-   ```
-### Building in standalone environment
-
-The library targets Android with NDK platform 21, so we have to patch
-[libfuse]() and [encfs]() source code to meet [bionic]() requirements.
-
-You can build on a standalone server (without Internet connection).
-Create vendor directory with the following structure (links to download
-you can see in CMakeLists.txt file):
-
-```
-vendor
-├── libfuse
-│   └── libfuse
-│       └── fuse-2.9.7.tar.gz
-├── openssl
-│   └── openssl
-│       └── openssl-1.0.1t.tar.gz
-└── vgough
-    └── encfs
-            └── encfs-1.9-rc1.tar.gz
+```sh
+mkdir build && cd build
+conan remote add hoxnox https://api.bintray.com/conan/hoxnox/conan
+conan install --build=missing ..
+cmake ..
+make
 ```
 
-Use `VENDOR_DIR` during configuration:
+Conan scripts conforms [vendor agreements](http://blog.hoxnox.com/vendoring_with_conan).
+So you can build on a standalone server.
 
-   ```sh
-   cmake -DANDROID_TOOLCHAIN=/home/user/devel/android/toolchain -DVENDOR_DIR=/home/user/vendor
-   ```
+### Exmaple
+
+```c++
+#include <string>
+#include <EncfsMounter.hpp>
+
+int main(int argc, char* argv[])
+{
+	EncfsMounter::set_readpassphrase(
+		[](std::string prompt) -> std::string { return "testpass"; });
+	EncfsMounter mounter("/encrypted", "/mountpoint", "/etc/secrets/config");
+	std::ofstream file("/mountpoint/testfile2");
+	file << "test";
+    return 0;
+}
+```
 
